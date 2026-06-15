@@ -1,0 +1,1172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BRCLpro | Financial Information Consulting Services</title>
+    <style>
+        /* 原有样式保持不变，新增以下样式 */
+        /* 分页内容容器 */
+        .page-content {
+            display: none;
+        }
+        .page-content.active {
+            display: block;
+        }
+
+        /* 服务详情弹窗 */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.7);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .modal-content {
+            background-color: var(--white);
+            border-radius: 10px;
+            width: 100%;
+            max-width: 800px;
+            padding: 40px;
+            position: relative;
+            box-shadow: var(--shadow);
+        }
+        .close-modal {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            font-size: 24px;
+            cursor: pointer;
+            color: var(--text-title);
+        }
+        .service-detail h3 {
+            color: var(--text-title);
+            font-size: 28px;
+            margin-bottom: 20px;
+            border-bottom: 2px solid var(--primary);
+            padding-bottom: 10px;
+        }
+        .service-detail p {
+            margin-bottom: 15px;
+            line-height: 1.8;
+        }
+        .service-detail ul {
+            margin: 20px 0;
+            padding-left: 20px;
+            list-style: disc;
+        }
+        .service-detail li {
+            margin-bottom: 10px;
+            color: var(--text-body);
+        }
+
+        /* 团队成员详情 */
+        .team-detail {
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid var(--secondary);
+            display: none;
+        }
+        .team-detail.show {
+            display: block;
+        }
+        .team-card .btn-view {
+            margin-top: 10px;
+            padding: 8px 16px;
+            font-size: 14px;
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        .team-card .btn-view:hover {
+            background-color: rgba(var(--primary-rgb), 0.9);
+        }
+
+        /* 原有样式 */
+        :root {
+            --primary: #16A34A;
+            --primary-rgb: 22, 163, 74;
+            --secondary: #86EFAC;
+            --secondary-rgb: 134, 239, 172;
+            --accent: #EAB308;
+            --accent-rgb: 234, 179, 8;
+            --bg-main: #F0FDF4;
+            --bg-main-rgb: 240, 253, 244;
+            --text-title: #14532D;
+            --text-body: #475569;
+            --page-normal: #D9F99D;
+            --page-disabled: #E2E8F0;
+            --white: #ffffff;
+            --shadow: 0 4px 20px rgba(0,0,0,0.08);
+            --transition: all 0.3s ease;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Roboto, Arial, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-main);
+            color: var(--text-body);
+            line-height: 1.6;
+        }
+
+        a {
+            text-decoration: none;
+            color: inherit;
+        }
+
+        ul {
+            list-style: none;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 12px 28px;
+            border-radius: 6px;
+            font-weight: 600;
+            transition: var(--transition);
+            border: none;
+            cursor: pointer;
+            font-size: 15px;
+        }
+
+        .btn-primary {
+            background-color: var(--primary);
+            color: var(--white);
+        }
+
+        .btn-primary:hover {
+            background-color: rgba(var(--primary-rgb), 0.9);
+            transform: translateY(-2px);
+        }
+
+        .btn-accent {
+            background-color: var(--accent);
+            color: var(--white);
+        }
+
+        .btn-accent:hover {
+            opacity: 0.9;
+            transform: translateY(-2px);
+        }
+
+        section {
+            padding: 80px 0;
+        }
+
+        .section-title {
+            font-size: 36px;
+            color: var(--text-title);
+            text-align: center;
+            margin-bottom: 20px;
+            font-weight: 700;
+        }
+
+        .section-desc {
+            text-align: center;
+            max-width: 700px;
+            margin: 0 auto 50px;
+            font-size: 16px;
+            color: var(--text-body);
+        }
+
+        /* Header & Navigation */
+        header {
+            background-color: var(--bg-main);
+            box-shadow: var(--shadow);
+            position: sticky;
+            top: 0;
+            z-index: 999;
+        }
+
+        .nav-wrap {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 80px;
+        }
+
+        .logo {
+            font-size: 28px;
+            font-weight: 800;
+            color: var(--text-title);
+        }
+
+        .logo span {
+            color: var(--primary);
+        }
+
+        .main-nav {
+            display: flex;
+            gap: 8px;
+        }
+
+        .main-nav li a {
+            display: block;
+            padding: 10px 20px;
+            border-radius: 4px;
+            color: var(--text-title);
+            font-weight: 500;
+            transition: var(--transition);
+        }
+
+        .main-nav li a:hover {
+            background-color: var(--secondary);
+        }
+
+        .main-nav li a.active {
+            background-color: var(--primary);
+            color: var(--white);
+        }
+
+        /* Mobile Menu */
+        .menu-toggle {
+            display: none;
+            font-size: 28px;
+            color: var(--text-title);
+            cursor: pointer;
+        }
+
+        /* Hero Section */
+        .hero {
+            height: calc(100vh - 80px);
+            display: flex;
+            align-items: center;
+            background-color: var(--bg-main);
+            overflow: hidden;
+        }
+
+        .hero-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            align-items: center;
+            gap: 40px;
+        }
+
+        .hero-text h1 {
+            font-size: 48px;
+            color: var(--text-title);
+            line-height: 1.2;
+            margin-bottom: 25px;
+        }
+
+        .hero-text p {
+            font-size: 18px;
+            margin-bottom: 35px;
+            color: var(--text-body);
+        }
+
+        .hero-btns {
+            display: flex;
+            gap: 20px;
+        }
+
+        .hero-img img {
+            width: 100%;
+            border-radius: 10px;
+            box-shadow: var(--shadow);
+        }
+
+        /* About Section */
+        .about {
+            background-color: var(--white);
+        }
+
+        .about-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 50px;
+            align-items: center;
+        }
+
+        .about-img img {
+            width: 100%;
+            border-radius: 10px;
+            box-shadow: var(--shadow);
+        }
+
+        .about-text h3 {
+            font-size: 28px;
+            color: var(--text-title);
+            margin-bottom: 20px;
+        }
+
+        .about-text p {
+            margin-bottom: 18px;
+            font-size: 16px;
+        }
+
+        /* Services Section */
+        .services-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 30px;
+        }
+
+        .service-card {
+            background-color: var(--white);
+            padding: 35px 25px;
+            border-radius: 10px;
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+            border-top: 4px solid var(--primary);
+            cursor: pointer;
+        }
+
+        .service-card:hover {
+            transform: translateY(-8px);
+        }
+
+        .service-card h4 {
+            font-size: 22px;
+            color: var(--text-title);
+            margin-bottom: 15px;
+        }
+
+        .service-card p {
+            font-size: 15px;
+        }
+
+        /* Team Section */
+        .team {
+            background-color: var(--white);
+        }
+
+        .team-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 30px;
+        }
+
+        .team-card {
+            text-align: center;
+            background-color: var(--bg-main);
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: var(--shadow);
+        }
+
+        .team-card img {
+            width: 100%;
+            height: 220px;
+            object-fit: cover;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+
+        .team-card h4 {
+            color: var(--text-title);
+            font-size: 20px;
+        }
+
+        .team-card span {
+            color: var(--accent);
+            font-weight: 500;
+        }
+
+        /* Contact Section */
+        .contact-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 50px;
+        }
+
+        .contact-info {
+            background-color: var(--white);
+            padding: 35px;
+            border-radius: 10px;
+            box-shadow: var(--shadow);
+        }
+
+        .contact-info h3 {
+            font-size: 26px;
+            color: var(--text-title);
+            margin-bottom: 25px;
+        }
+
+        .contact-item {
+            margin-bottom: 20px;
+            display: flex;
+            align-items: flex-start;
+            gap: 15px;
+        }
+
+        .contact-item i {
+            font-size: 22px;
+            color: var(--primary);
+            margin-top: 3px;
+        }
+
+        .contact-item h5 {
+            font-size: 17px;
+            color: var(--text-title);
+            margin-bottom: 5px;
+        }
+
+        .contact-form {
+            background-color: var(--white);
+            padding: 35px;
+            border-radius: 10px;
+            box-shadow: var(--shadow);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: var(--text-title);
+            font-weight: 500;
+        }
+
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 15px;
+            transition: var(--transition);
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .form-group textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+
+        .success-msg {
+            display: none;
+            margin-top: 15px;
+            padding: 12px;
+            background-color: rgba(var(--primary-rgb), 0.1);
+            color: var(--primary);
+            border-radius: 6px;
+            text-align: center;
+            font-weight: 500;
+        }
+
+        /* Pagination Style */
+        .pagination {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 40px;
+        }
+
+        .page-link {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            border-radius: 4px;
+            background-color: var(--page-normal);
+            color: var(--text-title);
+            font-weight: 500;
+            transition: var(--transition);
+            cursor: pointer;
+        }
+
+        .page-link.active {
+            background-color: var(--primary);
+            color: var(--white);
+        }
+
+        .page-link.disabled {
+            background-color: var(--page-disabled);
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+
+        /* Footer */
+        footer {
+            background-color: var(--text-title);
+            color: var(--white);
+            padding: 40px 0 20px;
+        }
+
+        .footer-content {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .footer-col h4 {
+            font-size: 20px;
+            margin-bottom: 20px;
+            color: var(--secondary);
+        }
+
+        .footer-col p,
+        .footer-col a {
+            color: rgba(255,255,255,0.8);
+            font-size: 15px;
+            line-height: 1.8;
+        }
+
+        .footer-col a:hover {
+            color: var(--secondary);
+        }
+
+        .copyright {
+            text-align: center;
+            padding-top: 20px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            font-size: 14px;
+            color: rgba(255,255,255,0.6);
+        }
+
+        /* Mobile Responsive */
+        @media (max-width: 992px) {
+            .hero-content,
+            .about-grid,
+            .contact-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .services-grid,
+            .team-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .footer-content {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .menu-toggle {
+                display: block;
+            }
+
+            .main-nav {
+                position: absolute;
+                top: 80px;
+                left: 0;
+                width: 100%;
+                background-color: var(--bg-main);
+                flex-direction: column;
+                padding: 20px;
+                box-shadow: var(--shadow);
+                display: none;
+            }
+
+            .main-nav.show {
+                display: flex;
+            }
+
+            .hero-text h1 {
+                font-size: 36px;
+            }
+
+            .section-title {
+                font-size: 28px;
+            }
+
+            .services-grid,
+            .team-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .footer-content {
+                grid-template-columns: 1fr;
+                text-align: center;
+            }
+
+            section {
+                padding: 50px 0;
+            }
+
+            .modal-content {
+                padding: 25px;
+            }
+            .service-detail h3 {
+                font-size: 24px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .hero-btns {
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            .hero-text h1 {
+                font-size: 28px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header & Navigation -->
+    <header>
+        <div class="container nav-wrap">
+            <a href="#home" class="logo">BRCLpro <span>Finance</span></a>
+            <div class="menu-toggle" id="menuToggle">☰</div>
+            <ul class="main-nav" id="mainNav">
+                <li><a href="#home" class="active nav-link">Home</a></li>
+                <li><a href="#about" class="nav-link">About Us</a></li>
+                <li><a href="#services" class="nav-link">Services</a></li>
+                <li><a href="#team" class="nav-link">Our Team</a></li>
+                <li><a href="#contact" class="nav-link">Contact Us</a></li>
+            </ul>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section id="home" class="hero">
+        <div class="container hero-content">
+            <div class="hero-text">
+                <h1>Professional Financial Information Consulting</h1>
+                <p>BRCLpro provides high-end, reliable and comprehensive financial consulting solutions for global clients, with professional experience and precise market insight.</p>
+                <div class="hero-btns">
+                    <a href="#services" class="btn btn-primary">Our Services</a>
+                    <a href="#contact" class="btn btn-accent">Get In Touch</a>
+                </div>
+            </div>
+            <div class="hero-img">
+                <img src="https://waudarticegg516-ctrl.github.io/327/48.jpg" alt="Financial Consulting">
+            </div>
+        </div>
+    </section>
+
+    <!-- About Us Section -->
+    <section id="about" class="about">
+        <div class="container">
+            <h2 class="section-title">About BRCLpro</h2>
+            <p class="section-desc">Founded in Exeter, England, BRCLpro is a leading financial information consulting firm committed to delivering value-added financial services.</p>
+            
+            <!-- 分页内容容器 -->
+            <div class="about-grid page-content active" id="page1">
+                <div class="about-img">
+                    <img src="https://waudarticegg516-ctrl.github.io/327/49.jpg" alt="Company Introduction">
+                </div>
+                <div class="about-text">
+                    <h3>Trusted Financial Partner</h3>
+                    <p>BRCLpro is headquartered at 82 King William St, Exeter, England. We focus on financial information analysis, market research, investment consulting and risk assessment.</p>
+                    <p>With years of industry experience, our team serves enterprises, institutions and individual investors across multiple regions. We adhere to professionalism, integrity and efficiency to create stable returns and reliable strategies for every client.</p>
+                    <p>We keep pace with global financial trends, continuously optimize service systems, and maintain long-term stable cooperative relationships with partners.</p>
+                </div>
+            </div>
+
+            <div class="about-grid page-content" id="page2">
+                <div class="about-img">
+                    <img src="https://waudarticegg516-ctrl.github.io/327/50.jpg" alt="Our Mission">
+                </div>
+                <div class="about-text">
+                    <h3>Our Mission & Vision</h3>
+                    <p>Our mission is to empower clients with accurate financial information and strategic insights, enabling them to make informed decisions in an increasingly complex global market.</p>
+                    <p>We aim to become the most trusted financial consulting partner in Europe, recognized for our deep industry knowledge, personalized service, and commitment to client success.</p>
+                    <p>We are committed to sustainable development, integrating ESG (Environmental, Social, Governance) factors into our consulting services to help clients achieve both financial returns and social value.</p>
+                </div>
+            </div>
+
+            <div class="about-grid page-content" id="page3">
+                <div class="about-img">
+                    <img src="https://waudarticegg516-ctrl.github.io/327/51.jpg" alt="Our Values">
+                </div>
+                <div class="about-text">
+                    <h3>Core Values</h3>
+                    <p><strong>Professionalism:</strong> Our team consists of certified financial analysts, CFA charterholders, and industry experts with extensive experience in global financial markets.</p>
+                    <p><strong>Integrity:</strong> We maintain the highest ethical standards in all our operations, ensuring transparency and accountability in every client engagement.</p>
+                    <p><strong>Innovation:</strong> We continuously invest in technology and research to develop cutting-edge analytical tools and methodologies for financial forecasting and risk management.</p>
+                    <p><strong>Client-Centric:</strong> Every solution is tailored to meet the unique needs and goals of our clients, with a focus on long-term value creation rather than short-term gains.</p>
+                </div>
+            </div>
+
+            <div class="pagination" id="aboutPagination">
+                <a href="#" class="page-link disabled" data-page="prev">&lt;</a>
+                <a href="#" class="page-link active" data-page="1">1</a>
+                <a href="#" class="page-link" data-page="2">2</a>
+                <a href="#" class="page-link" data-page="3">3</a>
+                <a href="#" class="page-link" data-page="next">&gt;</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Services Section -->
+    <section id="services">
+        <div class="container">
+            <h2 class="section-title">Our Services</h2>
+            <p class="section-desc">We offer diversified financial information consulting services to meet different business and investment demands.</p>
+            <div class="services-grid">
+                <!-- 服务卡片 - 带详情触发 -->
+                <div class="service-card" data-service="market-analysis">
+                    <h4>Financial Market Analysis</h4>
+                    <p>Real-time tracking of global financial markets, in-depth data analysis, trend prediction and professional market reports.</p>
+                </div>
+                <div class="service-card" data-service="investment-consulting">
+                    <h4>Investment Consulting</h4>
+                    <p>Customized investment plans, asset allocation suggestions and portfolio optimization for clients.</p>
+                </div>
+                <div class="service-card" data-service="risk-management">
+                    <h4>Risk Management</h4>
+                    <p>Comprehensive financial risk assessment, early warning mechanism and risk control solutions.</p>
+                </div>
+                <div class="service-card" data-service="enterprise-consulting">
+                    <h4>Enterprise Financial Consulting</h4>
+                    <p>Financial planning, operation analysis and strategic consulting for medium and large enterprises.</p>
+                </div>
+                <div class="service-card" data-service="data-research">
+                    <h4>Data Research</h4>
+                    <p>Industry financial data collection, sorting, mining and professional research services.</p>
+                </div>
+                <div class="service-card" data-service="financial-training">
+                    <h4>Financial Training</h4>
+                    <p>Professional financial knowledge training and skill improvement courses for teams and individuals.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 服务详情弹窗 -->
+    <div class="modal" id="serviceModal">
+        <div class="modal-content">
+            <span class="close-modal" id="closeModal">&times;</span>
+            <div class="service-detail" id="serviceDetail">
+                <!-- 动态加载服务详情 -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Our Team Section -->
+    <section id="team" class="team">
+        <div class="container">
+            <h2 class="section-title">Our Professional Team</h2>
+            <p class="section-desc">Our core team consists of senior financial experts, analysts and consultants with rich practical experience.</p>
+            <div class="team-grid">
+                <div class="team-card">
+                    <img src="https://waudarticegg516-ctrl.github.io/327/52.jpg" alt="Team Member">
+                    <h4>Michael Brown</h4>
+                    <span>Chief Financial Analyst</span>
+                    <button class="btn-view" onclick="toggleTeamDetail(this)">View Profile</button>
+                    <div class="team-detail">
+                        <p>Michael has over 15 years of experience in financial market analysis, specializing in European and North American markets. He holds a CFA Level 3 certification and a Master's degree in Financial Economics from the University of Oxford.</p>
+                        <p>Before joining BRCLpro, he worked as a senior analyst at a top international investment bank, providing strategic advice to institutional clients. His expertise includes quantitative analysis, market trend forecasting, and portfolio optimization.</p>
+                        <p>Michael leads our market analysis team, ensuring that our clients receive the most accurate and timely financial insights to support their investment decisions.</p>
+                    </div>
+                </div>
+                <div class="team-card">
+                    <img src="https://waudarticegg516-ctrl.github.io/327/53.jpg" alt="Team Member">
+                    <h4>Sarah Wilson</h4>
+                    <span>Senior Consultant</span>
+                    <button class="btn-view" onclick="toggleTeamDetail(this)">View Profile</button>
+                    <div class="team-detail">
+                        <p>Sarah is a seasoned financial consultant with a focus on corporate financial strategy and risk management. She has worked with over 50 medium and large enterprises across various industries, including manufacturing, technology, and healthcare.</p>
+                        <p>She holds an MBA from London Business School and is a certified Financial Risk Manager (FRM). Her approach combines strategic thinking with practical implementation, helping clients optimize their financial operations and mitigate risks.</p>
+                        <p>At BRCLpro, Sarah oversees the enterprise consulting division, leading a team of specialists to deliver customized financial solutions for corporate clients.</p>
+                    </div>
+                </div>
+                <div class="team-card">
+                    <img src="https://waudarticegg516-ctrl.github.io/327/54.jpg" alt="Team Member">
+                    <h4>David Clark</h4>
+                    <span>Risk Control Director</span>
+                    <button class="btn-view" onclick="toggleTeamDetail(this)">View Profile</button>
+                    <div class="team-detail">
+                        <p>David is an expert in financial risk management with over 20 years of experience in the banking and financial services industry. He previously served as the risk control director at a major UK bank, responsible for developing and implementing risk management frameworks.</p>
+                        <p>He is a Fellow of the Institute of Risk Management (IRM) and has extensive knowledge in credit risk, market risk, and operational risk assessment. His work at BRCLpro focuses on helping clients build robust risk management systems and comply with regulatory requirements.</p>
+                        <p>David also leads our financial training programs, sharing his expertise with clients and internal teams to enhance risk awareness and management capabilities.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Us Section -->
+    <section id="contact">
+        <div class="container">
+            <h2 class="section-title">Contact Us</h2>
+            <p class="section-desc">Feel free to contact us for business cooperation, consultation and other inquiries.</p>
+            <div class="contact-grid">
+                <div class="contact-info">
+                    <h3>Contact Information</h3>
+                    <div class="contact-item">
+                        <i>📍</i>
+                        <div>
+                            <h5>Company Address</h5>
+                            <p>England Exeter 82 King William St</p>
+                        </div>
+                    </div>
+                    <div class="contact-item">
+                        <i>📞</i>
+                        <div>
+                            <h5>Phone Number</h5>
+                            <p>+44 7615708492</p>
+                        </div>
+                    </div>
+                    <div class="contact-item">
+                        <i>📧</i>
+                        <div>
+                            <h5>Email Address</h5>
+                            <p>info@BRCLprofinance.com</p>
+                        </div>
+                    </div>
+                    <div class="contact-item">
+                        <i>🕒</i>
+                        <div>
+                            <h5>Business Hours</h5>
+                            <p>Monday - Friday: 09:00 - 18:00</p>
+                            <p>Saturday - Sunday: By Appointment Only</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="contact-form">
+                    <form id="contactForm">
+                        <div class="form-group">
+                            <label for="name">Your Name</label>
+                            <input type="text" id="name" name="name" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="email">Your Email</label>
+                            <input type="email" id="email" name="email" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="subject">Subject</label>
+                            <input type="text" id="subject" name="subject" required placeholder="e.g. Service Inquiry, Partnership, etc.">
+                        </div>
+                        <div class="form-group">
+                            <label for="message">Your Message</label>
+                            <textarea id="message" name="message" required placeholder="Please provide detailed information about your inquiry or request."></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Submit Message</button>
+                        <div class="success-msg" id="successMsg">Your message has been submitted successfully! We will reply to you within 24 business hours.</div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-col">
+                    <h4>BRCLpro</h4>
+                    <p>Professional Financial Information Consulting Services, based in Exeter, England. We provide tailored financial solutions to clients across Europe, Asia, and North America.</p>
+                    <p>Regulated by the Financial Conduct Authority (FCA) of the UK, registration number: FRN 123456.</p>
+                </div>
+                <div class="footer-col">
+                    <h4>Quick Links</h4>
+                    <p><a href="#home">Home</a></p>
+                    <p><a href="#about">About Us</a></p>
+                    <p><a href="#services">Services</a></p>
+                    <p><a href="#team">Our Team</a></p>
+                    <p><a href="#contact">Contact</a></p>
+                    <p><a href="#" onclick="alert('Privacy Policy will be available soon')">Privacy Policy</a></p>
+                </div>
+                <div class="footer-col">
+                    <h4>Contact</h4>
+                    <p>82 King William St, Exeter, England</p>
+                    <p>Tel: +44 7615708492</p>
+                    <p>Email: info@BRCLprofinance.com</p>
+                    <p>Follow us: LinkedIn | Twitter | Facebook</p>
+                </div>
+            </div>
+            <div class="copyright">
+                &copy; 2026 BRCLpro Financial Consulting. All Rights Reserved.
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Mobile Menu Toggle
+        const menuToggle = document.getElementById('menuToggle');
+        const mainNav = document.getElementById('mainNav');
+        const navLinks = document.querySelectorAll('.nav-link');
+
+        menuToggle.addEventListener('click', () => {
+            mainNav.classList.toggle('show');
+        });
+
+        // Close mobile menu after click link
+        navLinks.forEach(link => {
+            link.addEventListener('click', () => {
+                if(window.innerWidth <= 768) {
+                    mainNav.classList.remove('show');
+                }
+            });
+        });
+
+        // Smooth Scroll for Navigation
+        navLinks.forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                const targetId = this.getAttribute('href');
+                const targetSection = document.querySelector(targetId);
+                window.scrollTo({
+                    top: targetSection.offsetTop - 80,
+                    behavior: 'smooth'
+                });
+
+                // Active nav state
+                navLinks.forEach(item => item.classList.remove('active'));
+                this.classList.add('active');
+            });
+        });
+
+        // Scroll Spy - Update active nav on scroll
+        window.addEventListener('scroll', () => {
+            let current = '';
+            const sections = document.querySelectorAll('section');
+            sections.forEach(section => {
+                const sectionTop = section.offsetTop - 100;
+                const sectionHeight = section.clientHeight;
+                if(pageYOffset >= sectionTop) {
+                    current = section.getAttribute('id');
+                }
+            });
+
+            navLinks.forEach(link => {
+                link.classList.remove('active');
+                if(link.getAttribute('href') === '#' + current) {
+                    link.classList.add('active');
+                }
+            });
+        });
+
+        // Contact Form Submit - Always show success
+        const contactForm = document.getElementById('contactForm');
+        const successMsg = document.getElementById('successMsg');
+
+        contactForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            successMsg.style.display = 'block';
+            contactForm.reset();
+            // Hide message after 3 seconds
+            setTimeout(() => {
+                successMsg.style.display = 'none';
+            }, 3000);
+        });
+
+        // 新增：关于我们分页功能
+        const paginationLinks = document.querySelectorAll('#aboutPagination .page-link');
+        const pageContents = document.querySelectorAll('.page-content');
+        let currentPage = 1;
+        const totalPages = 3;
+
+        paginationLinks.forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                const pageAction = link.getAttribute('data-page');
+                
+                // 更新当前页码
+                if(pageAction === 'prev' && currentPage > 1) {
+                    currentPage--;
+                } else if(pageAction === 'next' && currentPage < totalPages) {
+                    currentPage++;
+                } else if(!isNaN(pageAction)) {
+                    currentPage = parseInt(pageAction);
+                }
+
+                // 更新分页按钮状态
+                updatePagination();
+                
+                // 显示对应页面内容
+                pageContents.forEach(content => {
+                    content.classList.remove('active');
+                });
+                document.getElementById(`page${currentPage}`).classList.add('active');
+            });
+        });
+
+        function updatePagination() {
+            paginationLinks.forEach(link => {
+                const pageAction = link.getAttribute('data-page');
+                
+                // 重置所有按钮状态
+                link.classList.remove('active', 'disabled');
+                
+                // 激活当前页码按钮
+                if(pageAction === currentPage.toString()) {
+                    link.classList.add('active');
+                }
+                
+                // 禁用上一页/下一页按钮
+                if(pageAction === 'prev' && currentPage === 1) {
+                    link.classList.add('disabled');
+                }
+                if(pageAction === 'next' && currentPage === totalPages) {
+                    link.classList.add('disabled');
+                }
+            });
+        }
+
+        // 新增：服务详情弹窗功能
+        const serviceCards = document.querySelectorAll('.service-card');
+        const modal = document.getElementById('serviceModal');
+        const closeModal = document.getElementById('closeModal');
+        const serviceDetail = document.getElementById('serviceDetail');
+
+        // 服务详情数据
+        const serviceDetails = {
+            'market-analysis': {
+                title: 'Financial Market Analysis',
+                content: `
+                    <p>Our Financial Market Analysis service provides comprehensive and real-time insights into global financial markets, helping clients navigate market volatility and identify opportunities.</p>
+                    <h4>Key Features:</h4>
+                    <ul>
+                        <li>Real-time monitoring of stock markets, forex, commodities, and fixed income markets</li>
+                        <li>In-depth technical and fundamental analysis of market trends</li>
+                        <li>Customized market reports tailored to client's specific interests and regions</li>
+                        <li>Weekly and monthly market outlook forecasts</li>
+                        <li>Analysis of macroeconomic indicators and their impact on financial markets</li>
+                        <li>Competitor analysis and market positioning reports</li>
+                    </ul>
+                    <p>Our team of analysts uses advanced analytical tools and proprietary models to deliver accurate market predictions and actionable insights. We cover major markets including the UK, EU, US, Asia Pacific, and emerging markets.</p>
+                `
+            },
+            'investment-consulting': {
+                title: 'Investment Consulting',
+                content: `
+                    <p>Our Investment Consulting service helps clients build and optimize their investment portfolios to achieve their financial goals while managing risk effectively.</p>
+                    <h4>Key Features:</h4>
+                    <ul>
+                        <li>Personalized investment strategy development based on risk tolerance, time horizon, and financial goals</li>
+                        <li>Asset allocation recommendations across equities, bonds, alternative investments, and cash</li>
+                        <li>Portfolio performance analysis and optimization</li>
+                        <li>Tax-efficient investment planning (UK and international tax considerations)</li>
+                        <li>Retirement planning and wealth preservation strategies</li>
+                        <li>Regular portfolio reviews and adjustments based on market conditions</li>
+                    </ul>
+                    <p>Our consultants work closely with clients to understand their unique financial situation and develop customized investment plans that align with their long-term objectives. We provide ongoing support and adjustments to ensure portfolios remain aligned with changing market conditions and client needs.</p>
+                `
+            },
+            'risk-management': {
+                title: 'Risk Management',
+                content: `
+                    <p>Our Risk Management service helps clients identify, assess, and mitigate financial risks that could impact their business or investment portfolios.</p>
+                    <h4>Key Features:</h4>
+                    <ul>
+                        <li>Comprehensive risk assessment across market, credit, liquidity, and operational risks</li>
+                        <li>Development of risk management frameworks and policies</li>
+                        <li>Implementation of early warning systems for risk detection</li>
+                        <li>Stress testing and scenario analysis of portfolios and business operations</li>
+                        <li>Regulatory compliance risk assessment and mitigation</li>
+                        <li>Enterprise Risk Management (ERM) implementation</li>
+                    </ul>
+                    <p>We use industry-leading risk assessment methodologies and tools to help clients build robust risk management systems. Our approach is proactive, identifying potential risks before they materialize and developing strategies to mitigate their impact.</p>
+                `
+            },
+            'enterprise-consulting': {
+                title: 'Enterprise Financial Consulting',
+                content: `
+                    <p>Our Enterprise Financial Consulting service provides strategic financial advice to medium and large enterprises, helping them optimize their financial operations and achieve sustainable growth.</p>
+                    <h4>Key Features:</h4>
+                    <ul>
+                        <li>Financial planning and budgeting support</li>
+                        <li>Cash flow management and optimization</li>
+                        <li>Capital structure analysis and optimization</li>
+                        <li>Mergers and acquisitions advisory</li>
+                        <li>Financial performance analysis and benchmarking</li>
+                        <li>Strategic financial planning for business expansion</li>
+                    </ul>
+                    <p>Our team of corporate finance experts works with senior management to address critical financial challenges and identify growth opportunities. We provide practical, actionable recommendations that align with the company's strategic objectives and market conditions.</p>
+                `
+            },
+            'data-research': {
+                title: 'Data Research',
+                content: `
+                    <p>Our Data Research service provides comprehensive financial data collection, analysis, and interpretation to support informed decision-making.</p>
+                    <h4>Key Features:</h4>
+                    <ul>
+                        <li>Customized financial data collection from multiple sources</li>
+                        <li>Data cleansing, validation, and normalization</li>
+                        <li>Advanced data analytics and visualization</li>
+                        <li>Industry benchmarking and comparative analysis</li>
+                        <li>Longitudinal data analysis to identify trends and patterns</li>
+                        <li>Data-driven insights and recommendations</li>
+                    </ul>
+                    <p>We leverage big data technologies and financial analytics tools to transform raw data into actionable insights. Our research team has extensive experience in financial data mining and interpretation across various industries and market segments.</p>
+                `
+            },
+            'financial-training': {
+                title: 'Financial Training',
+                content: `
+                    <p>Our Financial Training programs help individuals and teams develop the financial knowledge and skills needed to succeed in today's complex financial environment.</p>
+                    <h4>Key Features:</h4>
+                    <ul>
+                        <li>Customized training programs for different skill levels (beginner to advanced)</li>
+                        <li>Courses on financial analysis, investment management, and risk assessment</li>
+                        <li>Certification preparation (CFA, FRM, ACCA, etc.)</li>
+                        <li>Corporate financial training for finance and non-finance professionals</li>
+                        <li>Interactive workshops and case studies</li>
+                        <li>Online and in-person training options</li>
+                    </ul>
+                    <p>Our trainers are industry experts with extensive practical experience and teaching credentials. We design our training programs to be practical and relevant, with a focus on real-world applications and hands-on learning.</p>
+                `
+            }
+        };
+
+        // 打开服务详情弹窗
+        serviceCards.forEach(card => {
+            card.addEventListener('click', () => {
+                const serviceId = card.getAttribute('data-service');
+                const service = serviceDetails[serviceId];
+                
+                serviceDetail.innerHTML = `
+                    <h3>${service.title}</h3>
+                    ${service.content}
+                `;
+                
+                modal.style.display = 'flex';
+                document.body.style.overflow = 'hidden'; // 防止背景滚动
+            });
+        });
+
+        // 关闭服务详情弹窗
+        closeModal.addEventListener('click', () => {
+            modal.style.display = 'none';
+            document.body.style.overflow = 'auto'; // 恢复背景滚动
+        });
+
+        // 点击弹窗外区域关闭
+        window.addEventListener('click', (e) => {
+            if(e.target === modal) {
+                modal.style.display = 'none';
+                document.body.style.overflow = 'auto';
+            }
+        });
+
+        // 新增：团队成员详情切换
+        function toggleTeamDetail(button) {
+            const detail = button.nextElementSibling;
+            detail.classList.toggle('show');
+            
+            // 更新按钮文本
+            if(detail.classList.contains('show')) {
+                button.textContent = 'Hide Profile';
+            } else {
+                button.textContent = 'View Profile';
+            }
+        }
+    </script>
+</body>
+</html>
